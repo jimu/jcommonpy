@@ -8,6 +8,7 @@ jcli provides common building blocks for CLI apps so you don't have to reinvent 
 
 ```python
 from jcli.echo import echo, echos parameter (reference module)
+from jcli.diag import diag
 from jcli.config import load_config, interpolate # TBD
 from jcli.presentation import BasePresenter, RichPresenter # TBD
 ```
@@ -16,19 +17,32 @@ from jcli.presentation import BasePresenter, RichPresenter # TBD
 
 | Module | Description | TBD |
 |--------|-------------|-----|
-| `jcli.echo` | Reference module - echos parameter | TBD |
-| `jcli.config` | Configuration management - env vars, CLI args, YAML files, interpolation | TBD |
+| `jcli.echo` | Reference module - echos given parameter | TBD |
+| `jcli.diag` | Reference module - calls given function when '--diag' and exits
+| `jcli.config` | Configuration management - env vars, CLI args, YAML files, interpolation
 | `jcli.presentation` | Pluggable output presenters - Log, Text, Rich, HTML, CSV | TBD |
 
 ## Quick Start
 
 ```python
-from jcli.echo import echo
+from jcli import *
 
-echo("Hello World!")
-=> "Hello, World!"
+jcli = JCLI.builder("my-app-name")
+    .add_module("echo")
+    .add_argument("--verbose", action="store_true", help="Display verbose output")
+    .add_module("config", path="~/.myapprc", env="MYAPPRC")
+    .add_module("diag", mydiag)
+
+# defines the callback function supplied to the diag module
+def mydiag():None
+    printf("any diagnostic output")
+
+# uses the echo module
+jcli.echo("Hello World!")
+
+# returns value from configuration file
+jcli.config.get("mykey", "default value")
 ```
-
 ## Design Philosophy
 
 ### Lightweight Imports
@@ -57,7 +71,9 @@ Sensible defaults out of the box, but extensible when you need more control.
 TBD
 
 # Run tests
+```
 just test
+```
 
 ## Testing Philosophy
 
