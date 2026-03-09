@@ -9,7 +9,7 @@ The README.md Quick Start section shows a desired usage pattern for building CLI
 - Implement `add_module(name, **options)` to register modules (echo, config, diag)
 - Implement `add_argument(*args, **kwargs)` to add custom arguments
 - Implement echo, config, and diag modules into the JCLI system
-- Add diagnostic module (`diag`) that calls a callback when `--diag` flag is passed
+- Add diagnostic module (`diag`) that automatically calls a callback and exits when `--diag` flag is passed (no manual method call needed)
 - Implement "-h" / "--help" which automatically includes content relevant to any registered modules.
 
 ## Capabilities

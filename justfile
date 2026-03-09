@@ -110,7 +110,7 @@ quality: check pre-commit
 # docs:
 #     uv run mkdocs serve
 
-Build wheel + sdist
+# Build wheel + sdist
 build:
     uv build
 

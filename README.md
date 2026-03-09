@@ -25,7 +25,7 @@ from jcli.presentation import BasePresenter, RichPresenter # TBD
 ## Quick Start
 
 ```python
-from jcli import *
+from jcli import JCLI
 
 jcli = JCLI.builder("my-app-name")
     .add_module("echo")
@@ -34,14 +34,31 @@ jcli = JCLI.builder("my-app-name")
     .add_module("diag", mydiag)
 
 # defines the callback function supplied to the diag module
-def mydiag():None
-    printf("any diagnostic output")
+def mydiag() -> None:
+    print("any diagnostic output")
 
 # uses the echo module
 jcli.echo("Hello World!")
 
 # returns value from configuration file
 jcli.config.get("mykey", "default value")
+
+# parse arguments (diag runs automatically if --diag is passed)
+args = jcli.parse_args()
+```
+
+## Running the Example
+
+Install jcli in your environment, then run:
+
+```bash
+# Install jcli
+uv pip install -e .
+
+# Run the example
+python examples/basic.py
+python examples/basic.py --verbose
+python examples/basic.py --diag
 ```
 ## Design Philosophy
 
@@ -68,10 +85,14 @@ Sensible defaults out of the box, but extensible when you need more control.
 
 ## Installation
 
-TBD
-
-# Run tests
+```bash
+# Install jcli
+uv pip install -e .
 ```
+
+## Running Tests
+
+```bash
 just test
 ```
 
