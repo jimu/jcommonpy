@@ -37,14 +37,18 @@ jcli = JCLI.builder("my-app-name")
 def mydiag() -> None:
     print("any diagnostic output")
 
+# build the CLI application
+jcli = jcli.build()
+
 # uses the echo module
 jcli.echo("Hello World!")
 
 # returns value from configuration file
 jcli.config.get("mykey", "default value")
 
-# parse arguments (diag runs automatically if --diag is passed)
-args = jcli.parse_args()
+# access parsed arguments
+if jcli.args.verbose:
+    print("Verbose mode enabled")
 ```
 
 ## Running the Example

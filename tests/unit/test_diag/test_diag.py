@@ -51,7 +51,7 @@ class TestJCLIDiagIntegration:
             callback_called.append(True)
 
         jcli.add_module("diag", mydiag)
-        jcli.parse_args(["--diag"])
+        jcli.build(["--diag"])
 
         assert callback_called == [True]
         mock_exit.assert_called_once_with(0)
@@ -63,7 +63,7 @@ class TestJCLIDiagIntegration:
         callback = MagicMock()
         jcli.add_module("diag", callback)
 
-        jcli.parse_args(["--diag"])
+        jcli.build(["--diag"])
 
         callback.assert_called_once()
         mock_exit.assert_called_once_with(0)
@@ -74,7 +74,7 @@ class TestJCLIDiagIntegration:
         jcli = JCLI.builder("testapp")
         jcli.add_module("diag")
 
-        jcli.parse_args(["--diag"])
+        jcli.build(["--diag"])
 
         mock_exit.assert_called_once_with(0)
 
@@ -85,7 +85,7 @@ class TestJCLIDiagIntegration:
         callback = MagicMock()
         jcli.add_module("diag", callback)
 
-        jcli.parse_args([])
+        jcli.build([])
 
         callback.assert_not_called()
         mock_exit.assert_not_called()

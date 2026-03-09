@@ -76,22 +76,22 @@ class TestJCLIArguments:
         """Test adding a boolean flag argument."""
         jcli = JCLI.builder("testapp")
         jcli.add_argument("--verbose", action="store_true")
-        args = jcli.parse_args(["--verbose"])
-        assert args.verbose is True
+        jcli.build(["--verbose"])
+        assert jcli.args.verbose is True
 
     def test_add_argument_without_flag(self):
         """Test parsing without the flag."""
         jcli = JCLI.builder("testapp")
         jcli.add_argument("--verbose", action="store_true")
-        args = jcli.parse_args([])
-        assert args.verbose is False
+        jcli.build([])
+        assert jcli.args.verbose is False
 
     def test_add_argument_string_arg(self):
         """Test adding a string argument."""
         jcli = JCLI.builder("testapp")
         jcli.add_argument("--output", type=str, default="result.txt")
-        args = jcli.parse_args(["--output", "myfile.txt"])
-        assert args.output == "myfile.txt"
+        jcli.build(["--output", "myfile.txt"])
+        assert jcli.args.output == "myfile.txt"
 
     def test_fluent_api_chain(self):
         """Test fluent API chaining works."""
@@ -99,12 +99,12 @@ class TestJCLIArguments:
         jcli.add_module("echo").add_argument("--verbose", action="store_true")
         assert jcli.echo("test") == "test"
 
-    def test_parse_args_default_empty(self):
-        """Test parse_args with empty list."""
+    def test_build_default_empty(self):
+        """Test build with empty args."""
         jcli = JCLI.builder("testapp")
         jcli.add_module("config")
-        args = jcli.parse_args([])
-        assert isinstance(args, object)
+        jcli.build([])
+        assert isinstance(jcli.args, object)
 
     def test_config_module_adds_config_argument(self):
         """Test that config module adds -c/--config argument."""
@@ -120,7 +120,7 @@ class TestJCLIArguments:
         mock_load.return_value = {}
         jcli = JCLI.builder("testapp")
         jcli.add_module("config")
-        jcli.parse_args(["--config", "/path/to/config.yaml"])
+        jcli.build(["--config", "/path/to/config.yaml"])
         mock_load.assert_called()
 
     def test_config_env_var_invalid_exits(self):
@@ -132,7 +132,7 @@ class TestJCLIArguments:
             jcli = JCLI.builder("testapp")
             jcli.add_module("config", env="TEST_INVALID_CONFIG")
             with pytest.raises(SystemExit) as exc_info:
-                jcli.parse_args([])
+                jcli.build([])
             assert exc_info.value.code == 1
         finally:
             del os.environ["TEST_INVALID_CONFIG"]

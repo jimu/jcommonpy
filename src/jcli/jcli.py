@@ -25,11 +25,22 @@ class JCLI:
         self._module_options: dict[str, dict[str, Any]] = {}
         self._parser = argparse.ArgumentParser(prog=app_name)
         self._config_cache: dict[str, Any] | None = None
+        self._parsed_args: argparse.Namespace | None = None
 
     @property
     def app_name(self) -> str:
         """Return the app name."""
         return self._app_name
+
+    @property
+    def args(self) -> argparse.Namespace:
+        """Return parsed command line arguments.
+
+        Assumes build() has been called to parse arguments.
+        """
+        if self._parsed_args is None:
+            raise RuntimeError("Must call build() before accessing args")
+        return self._parsed_args
 
     @classmethod
     def builder(cls, app_name: str) -> JCLI:
@@ -84,6 +95,22 @@ class JCLI:
             Self for method chaining.
         """
         self._parser.add_argument(*args, **kwargs)
+        return self
+
+    def build(self, args: list[str] | None = None) -> JCLI:
+        """Build the CLI application by parsing arguments.
+
+        This method parses command line arguments and sets up the application
+        for use. Call this after configuring modules and arguments.
+
+        Args:
+            args: Arguments to parse. Defaults to sys.argv.
+
+        Returns:
+            Self for method chaining.
+        """
+        if self._parsed_args is None:
+            self._parsed_args = self._parse_args(args)
         return self
 
     def __getattr__(self, name: str) -> Any:
@@ -151,8 +178,8 @@ class JCLI:
 
         raise ValueError(f"Unknown module: {name}")
 
-    def parse_args(self, args: list[str] | None = None) -> argparse.Namespace:
-        """Parse CLI arguments.
+    def _parse_args(self, args: list[str] | None = None) -> argparse.Namespace:
+        """Parse CLI arguments internally.
 
         Args:
             args: Arguments to parse. Defaults to sys.argv.

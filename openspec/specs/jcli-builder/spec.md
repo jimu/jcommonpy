@@ -50,16 +50,16 @@ The JCLI instance SHALL use `__getattr__` to delegate attribute access to regist
 - **WHEN** `value = jcli.config.get("key", "default")` after adding config module
 - **THEN** returns the config value or default
 
-### Requirement: JCLI can parse arguments
-The JCLI instance SHALL provide a `parse_args()` method that parses registered arguments and returns the namespace.
+### Requirement: JCLI can build and parse arguments
+The JCLI instance SHALL provide a `build()` method that parses registered arguments and makes them available via the `args` property.
 
-#### Scenario: Parse with default empty args
-- **WHEN** `args = jcli.parse_args([])`
+#### Scenario: Build with default empty args
+- **WHEN** `jcli.build([])` then `jcli.args`
 - **THEN** returns namespace with no attributes set
 
-#### Scenario: Parse with custom args
-- **WHEN** `jcli.add_argument("--quiet", action="store_true")` then `args = jcli.parse_args(["--quiet"])`
-- **THEN** `args.quiet` is True
+#### Scenario: Build with custom args
+- **WHEN** `jcli.add_argument("--quiet", action="store_true")` then `jcli.build(["--quiet"])`
+- **THEN** `jcli.args.quiet` is True
 
 ### Requirement: JCLI provides get_config method
 The JCLI instance SHALL provide a `get_config()` method that loads configuration using the app_name and any registered config module options.

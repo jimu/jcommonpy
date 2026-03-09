@@ -26,13 +26,14 @@ def main() -> None:
         .add_argument("--verbose", action="store_true", help="Enable verbose output")
         .add_module("diag", run_diagnostic)
         .add_argument("--output", type=str, default="output.txt", help="Output file name")
+        .build()
     )
 
     if jcli.args.verbose:
         print(f"[DEBUG] App: {jcli.app_name}")
-        print(f"[DEBUG] Output file: {args.output}")
+        print(f"[DEBUG] Output file: {jcli.args.output}")
 
-    result = jcli.echo(f"Output: {args.output}")
+    result = jcli.echo(f"Output: {jcli.args.output}")
     print(result)
 
 
