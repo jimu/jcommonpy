@@ -8,6 +8,7 @@ This example demonstrates all features implemented so far:
 - Module access via attributes
 """
 
+import os
 import sys
 import traceback
 
@@ -17,7 +18,9 @@ from jcli import JCLI
 def main() -> None:
     """Main entry point for the example CLI application."""
 
-    def run_diagnostic() -> None:
+    def run_diagnostic(jcli) -> None:
+        # TODO: implement jcli.config.config_path property, which should return the config pathname in use
+        print(f"Config file: {jcli.config.config_path}")
         print("Running diagnostic checks...")
         print("- All systems operational")
         print("Diagnostic complete!")
@@ -25,7 +28,7 @@ def main() -> None:
     jcli = (
         JCLI.builder("my-app")
         .add_module("echo")
-        .add_module("config", path="examples/basic.config")
+        .add_module("config", path=os.path.join(os.path.dirname(__file__), "basic.config"), env="BASIC_CONFIG")
         .add_argument("--verbose", action="store_true", help="Enable verbose output")
         .add_module("diag", run_diagnostic)
         .add_module("commands")
@@ -33,6 +36,10 @@ def main() -> None:
         .add_argument("action", nargs="?", choices=["list", "count"], help="Action to perform (list or count)")
         .build()
     )
+
+    if hasattr(jcli.args, "diag") and jcli.args.diag:
+        jcli.diag(jcli)
+        sys.exit(0)
 
     if jcli.args.verbose:
         print(f"[DEBUG] App: {jcli.app_name}")
@@ -54,6 +61,10 @@ def main() -> None:
                 if isinstance(result, list):
                     count = len(result)
                     print(f" {key}: {count}")
+                elif isinstance(result, dict) and result.get("dry_run"):
+                    # Dry-run mode: show command instead of executing
+                    interpolated_command = result.get("command", command)
+                    print(f" {key}: (dry-run) {interpolated_command}")
                 else:
                     print(f"Error: Command '{key}' did not return a JSON array", file=sys.stderr)
                     sys.exit(1)

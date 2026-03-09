@@ -3,8 +3,13 @@
 from __future__ import annotations
 
 import argparse
+import contextlib
+import os
 import sys
+from pathlib import Path
 from typing import Any
+
+import yaml
 
 from jcli import commands as commands_module
 from jcli import config as config_module
@@ -113,6 +118,15 @@ class JCLI:
         Returns:
             Self for method chaining.
         """
+        # Add commands-specific flags if commands module is enabled
+        if "commands" in self._modules:
+            with contextlib.suppress(argparse.ArgumentError):
+                self._parser.add_argument(
+                    "-n", "--dry-run", action="store_true", help="Show commands without executing them"
+                )
+            with contextlib.suppress(argparse.ArgumentError):
+                self._parser.add_argument("-v", "--verbose", action="store_true", help="Show commands during execution")
+
         if self._parsed_args is None:
             self._parsed_args = self._parse_args(args)
         return self
@@ -171,6 +185,41 @@ class JCLI:
                     cfg = self._jcli.get_config()
                     return cfg.get(key, default)
 
+                @property
+                def config_path(self) -> str | None:
+                    def _is_readable_yaml(p: Path) -> bool:
+                        if not p.exists() or not p.is_file():
+                            return False
+                        try:
+                            with open(p) as f:
+                                yaml.safe_load(f.read())
+                            return True
+                        except Exception:
+                            return False
+
+                    config_file = getattr(self._jcli.args, "config", None)
+                    if config_file:
+                        p = Path(config_file)
+                        if _is_readable_yaml(p):
+                            return str(p.resolve())
+                        return None
+
+                    env = self._opts.get("env")
+                    if env:
+                        env_value = os.environ.get(env)
+                        if env_value:
+                            p = Path(env_value)
+                            if _is_readable_yaml(p):
+                                return str(p.resolve())
+
+                    path = self._opts.get("path")
+                    if path:
+                        p = Path(path)
+                        if _is_readable_yaml(p):
+                            return str(p.resolve())
+
+                    return None
+
             return ConfigWrapper(self, config_module, self._app_name, options)
 
         if name == "diag":
@@ -188,6 +237,16 @@ class JCLI:
                     # Interpolate variables in command
                     config = self._jcli.get_config()
                     interpolated_command = self._commands._interpolate_command(command, config)
+
+                    # Handle dry-run mode
+                    if self._jcli.dry_run:
+                        print(interpolated_command)
+                        return {"dry_run": True, "command": interpolated_command}
+
+                    # Handle verbose mode
+                    if self._jcli.verbose:
+                        print(interpolated_command)
+
                     # Execute with interpolated command
                     return self._commands.execute(interpolated_command, format)
 
@@ -218,6 +277,11 @@ class JCLI:
             The parsed arguments namespace.
         """
         parsed = self._parser.parse_args(args)
+        self._parsed_args = parsed  # Set early for callbacks that access args
+
+        # Store dry-run and verbose flags for commands module
+        self.dry_run = getattr(parsed, "dry_run", False)
+        self.verbose = getattr(parsed, "verbose", False)
 
         if "config" in self._modules:
             config_opts = self._module_options.get("config", {})
@@ -233,7 +297,7 @@ class JCLI:
         if "diag" in self._modules and getattr(parsed, "diag", False):
             callback = self._module_options.get("diag", {}).get("callback")
             if callback:
-                callback()
+                callback(self)
             sys.exit(0)
 
         return parsed

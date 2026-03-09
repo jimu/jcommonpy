@@ -44,6 +44,14 @@ class TestBasicExample:
         assert "Diagnostic complete!" in captured.out
         mock_exit.assert_called_once_with(0)
 
+    @patch("sys.argv", ["basic.py", "list"])
+    def test_list_commands(self, capsys):
+        """Test that 'list' argument shows command keys."""
+        basic.main()
+        captured = capsys.readouterr()
+        assert "- catfood" in captured.out
+        assert "- litter" in captured.out
+
 
 class TestBasicExampleHelp:
     """Test cases for help output."""

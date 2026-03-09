@@ -4,7 +4,7 @@
 
 Provides functionality for executing shell commands that return JSON data, with automatic parsing and error handling.
 
-## ADDED Requirements
+## MODIFIED Requirements
 
 ### Requirement: Commands module executes shell commands and parses JSON
 The commands module SHALL provide a method to execute shell commands and parse their JSON output. Command strings SHALL support variable interpolation using `[var-name]` placeholders before execution. The module SHALL support dry-run mode where commands are displayed but not executed, and verbose mode where commands are displayed during execution.
