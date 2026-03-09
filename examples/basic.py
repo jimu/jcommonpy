@@ -24,8 +24,8 @@ def main() -> None:
         JCLI.builder("my-app")
         .add_module("echo")
         .add_module("config", path="~/.myapprc")
-        .add_module("diag", run_diagnostic)
         .add_argument("--verbose", action="store_true", help="Enable verbose output")
+        .add_module("diag", run_diagnostic)
         .add_argument("--output", type=str, default="output.txt", help="Output file name")
     )
 

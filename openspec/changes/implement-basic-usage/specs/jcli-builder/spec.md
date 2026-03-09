@@ -61,3 +61,44 @@ The JCLI instance SHALL provide a `get_config()` method that loads configuration
 #### Scenario: Get config returns dict
 - **WHEN** `config = jcli.get_config()`
 - **THEN** returns a dictionary object
+
+### Requirement: Config module supports --config argument
+The config module SHALL automatically add `-c/--config` argument when registered.
+
+#### Scenario: --config argument added
+- **WHEN** `jcli.add_module("config")`
+- **THEN** `-c` and `--config` arguments are available in the parser
+
+#### Scenario: Valid config file with --config
+- **WHEN** `--config /path/to/config.yaml` provided and file is readable
+- **THEN** config loaded from specified file
+
+#### Scenario: Invalid config file with --config
+- **WHEN** `--config /nonexistent.yaml` provided and file is not readable
+- **THEN** app exits with error message and code 1
+
+### Requirement: Config module supports environment variable fallback
+When --config is not specified, the config module SHALL check the environment variable specified during registration.
+
+#### Scenario: Environment variable set and valid
+- **WHEN** env var `MYCONFIG` is set to `/path/to/config.yaml` and file is readable
+- **AND** `jcli.add_module("config", env="MYCONFIG")` without --config
+- **THEN** config loaded from the file pointed to by env var
+
+#### Scenario: Environment variable set but invalid
+- **WHEN** env var `MYCONFIG` is set to `/nonexistent.yaml` and file is not readable
+- **AND** `jcli.add_module("config", env="MYCONFIG")` without --config
+- **THEN** app exits with error message and code 1
+
+### Requirement: Config module supports default path fallback
+When --config is not specified and env var is not set, the config module SHALL try the default path specified during registration.
+
+#### Scenario: Default path valid
+- **WHEN** `jcli.add_module("config", path="/path/to/config.yaml")` and file exists
+- **AND** no --config or env var specified
+- **THEN** config loaded from the default path
+
+#### Scenario: Default path invalid
+- **WHEN** `jcli.add_module("config", path="/nonexistent.yaml")` and file does not exist
+- **AND** no --config or env var specified
+- **THEN** returns empty config dict (not an error)

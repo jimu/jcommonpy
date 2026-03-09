@@ -24,6 +24,7 @@ class JCLI:
         self._modules: dict[str, Any] = {}
         self._module_options: dict[str, dict[str, Any]] = {}
         self._parser = argparse.ArgumentParser(prog=app_name)
+        self._config_cache: dict[str, Any] | None = None
 
     @property
     def app_name(self) -> str:
@@ -64,6 +65,9 @@ class JCLI:
 
         if name == "diag":
             self._parser.add_argument("--diag", action="store_true", help="Run diagnostic and exit")
+
+        if name == "config":
+            self._parser.add_argument("-c", "--config", type=str, help="Path to config file (YAML)")
 
         self._module_options[name] = options
         self._modules[name] = None
@@ -129,16 +133,17 @@ class JCLI:
             from jcli import config as config_module
 
             class ConfigWrapper:
-                def __init__(self, config_mod, app_name: str, opts: dict):
+                def __init__(self, jcli: JCLI, config_mod, app_name: str, opts: dict):
+                    self._jcli = jcli
                     self._config = config_mod
                     self._app_name = app_name
                     self._opts = opts
 
                 def get(self, key: str, default: Any = None) -> Any:
-                    cfg = self._config.load_config(app_name=self._app_name, **self._opts)
+                    cfg = self._jcli.get_config()
                     return cfg.get(key, default)
 
-            return ConfigWrapper(config_module, self._app_name, options)
+            return ConfigWrapper(self, config_module, self._app_name, options)
 
         if name == "diag":
             callback = options.get("callback")
@@ -157,6 +162,19 @@ class JCLI:
         """
         parsed = self._parser.parse_args(args)
 
+        if "config" in self._modules:
+            from jcli import config as config_module
+
+            config_opts = self._module_options.get("config", {})
+            config_file = getattr(parsed, "config", None)
+            if config_file:
+                config_opts = {**config_opts, "config_file": config_file}
+
+            self._config_cache = config_module.load_config(
+                app_name=self._app_name,
+                **config_opts,
+            )
+
         if "diag" in self._modules and getattr(parsed, "diag", False):
             callback = self._module_options.get("diag", {}).get("callback")
             if callback:
@@ -171,7 +189,11 @@ class JCLI:
         Returns:
             A dictionary with configuration values.
         """
+        if self._config_cache is not None:
+            return self._config_cache
+
         from jcli import config as config_module
 
         config_opts = self._module_options.get("config", {})
-        return config_module.load_config(app_name=self._app_name, **config_opts)
+        self._config_cache = config_module.load_config(app_name=self._app_name, **config_opts)
+        return self._config_cache

@@ -1,5 +1,7 @@
 """Tests for jcli.jcli module."""
 
+from unittest.mock import patch
+
 import pytest
 
 from jcli import JCLI
@@ -103,6 +105,23 @@ class TestJCLIArguments:
         jcli.add_module("config")
         args = jcli.parse_args([])
         assert isinstance(args, object)
+
+    def test_config_module_adds_config_argument(self):
+        """Test that config module adds -c/--config argument."""
+        jcli = JCLI.builder("testapp")
+        jcli.add_module("config")
+        help_text = jcli._parser.format_help()
+        assert "-c" in help_text
+        assert "--config" in help_text
+
+    @patch("jcli.config.load_config")
+    def test_config_file_passed_to_load_config(self, mock_load):
+        """Test that --config value is passed to load_config."""
+        mock_load.return_value = {}
+        jcli = JCLI.builder("testapp")
+        jcli.add_module("config")
+        jcli.parse_args(["--config", "/path/to/config.yaml"])
+        mock_load.assert_called()
 
 
 class TestJCLIGetConfig:
