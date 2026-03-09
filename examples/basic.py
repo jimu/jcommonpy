@@ -28,9 +28,7 @@ def main() -> None:
         .add_argument("--output", type=str, default="output.txt", help="Output file name")
     )
 
-    args = jcli.parse_args()
-
-    if args.verbose:
+    if jcli.args.verbose:
         print(f"[DEBUG] App: {jcli.app_name}")
         print(f"[DEBUG] Output file: {args.output}")
 
