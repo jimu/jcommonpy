@@ -13,7 +13,7 @@ jcli.echo("Hello World!")
 jcli.config.get("mykey", "default value")
 ```
 
-Currently, the `JCLI` class does not exist. The echo module exists as a standalone function, config module is a stub, and the diag module doesn't exist.
+Currently, the `JCLI` class does not exist. The echo module exists as a standalone function, config module is a stub, and the diag module doesn't exist. The goal is to implement a unified builder API.
 
 ## Goals / Non-Goals
 
@@ -64,5 +64,5 @@ Currently, the `JCLI` class does not exist. The echo module exists as a standalo
 - **[Risk]** No clear "run" or "execute" entry point in the API
   - **Mitigation:** The current design is for method chaining; actual execution happens by calling module methods directly. This matches the README example.
 
-- **[Risk]** Config module is currently a stub and returns empty dict
-  - **Mitigation:** Accept that config.get() will return defaults until the config module is fully implemented. The JCLI integration is still valid.
+- **[Risk]** Config file validation at parse_args time
+  - **Mitigation:** Config is validated early to fail fast if --config points to invalid file. Env var validation also happens at parse time.

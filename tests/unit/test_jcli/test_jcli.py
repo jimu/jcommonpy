@@ -123,6 +123,20 @@ class TestJCLIArguments:
         jcli.parse_args(["--config", "/path/to/config.yaml"])
         mock_load.assert_called()
 
+    def test_config_env_var_invalid_exits(self):
+        """Test that invalid env var causes exit."""
+        import os
+
+        os.environ["TEST_INVALID_CONFIG"] = "/nonexistent.yaml"
+        try:
+            jcli = JCLI.builder("testapp")
+            jcli.add_module("config", env="TEST_INVALID_CONFIG")
+            with pytest.raises(SystemExit) as exc_info:
+                jcli.parse_args([])
+            assert exc_info.value.code == 1
+        finally:
+            del os.environ["TEST_INVALID_CONFIG"]
+
 
 class TestJCLIGetConfig:
     """Test cases for get_config method."""

@@ -16,7 +16,6 @@ def main() -> None:
 
     def run_diagnostic() -> None:
         print("Running diagnostic checks...")
-        print("- Config loaded successfully")
         print("- All systems operational")
         print("Diagnostic complete!")
 
