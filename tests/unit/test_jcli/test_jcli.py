@@ -1,5 +1,6 @@
 """Tests for jcli.jcli module."""
 
+import os
 from unittest.mock import patch
 
 import pytest
@@ -125,8 +126,6 @@ class TestJCLIArguments:
 
     def test_config_env_var_invalid_exits(self):
         """Test that invalid env var causes exit."""
-        import os
-
         os.environ["TEST_INVALID_CONFIG"] = "/nonexistent.yaml"
         try:
             jcli = JCLI.builder("testapp")

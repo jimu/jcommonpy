@@ -1,10 +1,11 @@
 import argparse
+from typing import Any, ClassVar
 
 from jcli.config import load_config
 
 
 class CLIApp:
-    _module_registry = {
+    _module_registry: ClassVar[dict[str, Any]] = {
         "config": lambda parser: parser.add_argument("-c", "--config", help="Path to config file"),
         "echo": lambda parser: parser.add_argument("message", help="Message to echo"),
     }

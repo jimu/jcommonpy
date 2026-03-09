@@ -6,6 +6,10 @@ import argparse
 import sys
 from typing import Any
 
+from jcli import commands as commands_module
+from jcli import config as config_module
+from jcli.echo import echo as echo_func
+
 __all__ = ["JCLI"]
 
 
@@ -152,12 +156,9 @@ class JCLI:
         options = self._module_options.get(name, {})
 
         if name == "echo":
-            from jcli.echo import echo as echo_func
-
             return echo_func
 
         if name == "config":
-            from jcli import config as config_module
 
             class ConfigWrapper:
                 def __init__(self, jcli: JCLI, config_mod, app_name: str, opts: dict):
@@ -177,9 +178,33 @@ class JCLI:
             return callback
 
         if name == "commands":
-            from jcli import commands as commands_module
 
-            return commands_module
+            class CommandsWrapper:
+                def __init__(self, commands_mod, jcli: JCLI):
+                    self._commands = commands_mod
+                    self._jcli = jcli
+
+                def execute(self, command: str, format: str = "json") -> Any:
+                    # Interpolate variables in command
+                    config = self._jcli.get_config()
+                    interpolated_command = self._commands._interpolate_command(command, config)
+                    # Execute with interpolated command
+                    return self._commands.execute(interpolated_command, format)
+
+                # Expose exception classes
+                @property
+                def CommandFailed(self):
+                    return self._commands.CommandFailed
+
+                @property
+                def InvalidJSON(self):
+                    return self._commands.InvalidJSON
+
+                @property
+                def UndefinedVariable(self):
+                    return self._commands.UndefinedVariable
+
+            return CommandsWrapper(commands_module, self)
 
         raise ValueError(f"Unknown module: {name}")
 
@@ -195,8 +220,6 @@ class JCLI:
         parsed = self._parser.parse_args(args)
 
         if "config" in self._modules:
-            from jcli import config as config_module
-
             config_opts = self._module_options.get("config", {})
             config_file = getattr(parsed, "config", None)
             if config_file:
@@ -223,8 +246,6 @@ class JCLI:
         """
         if self._config_cache is not None:
             return self._config_cache
-
-        from jcli import config as config_module
 
         config_opts = self._module_options.get("config", {})
         self._config_cache = config_module.load_config(app_name=self._app_name, **config_opts)

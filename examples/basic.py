@@ -9,6 +9,7 @@ This example demonstrates all features implemented so far:
 """
 
 import sys
+import traceback
 
 from jcli import JCLI
 
@@ -41,7 +42,7 @@ def main() -> None:
         # List all command keys from config
         config = jcli.get_config()
         commands = config.get("commands", {})
-        for key in commands.keys():
+        for key in commands:
             print(f" - {key}")
     elif jcli.args.action == "count":
         # Execute each command and count JSON array items
@@ -56,8 +57,9 @@ def main() -> None:
                 else:
                     print(f"Error: Command '{key}' did not return a JSON array", file=sys.stderr)
                     sys.exit(1)
-            except (jcli.commands.CommandFailed, jcli.commands.InvalidJSON) as e:
-                print(f"Error executing command '{key}': {e}", file=sys.stderr)
+            except Exception as e:
+                print(f"Error executing command '{key}': {type(e).__name__}: {e}", file=sys.stderr)
+                traceback.print_exc()
                 sys.exit(1)
     else:
         # Default behavior - echo output

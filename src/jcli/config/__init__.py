@@ -13,11 +13,11 @@ __all__ = ["load_config"]
 
 
 def load_config(
-    app_name: str | None = None,
+    app_name: str | None = None,  # noqa: ARG001
     path: str | None = None,
     env: str | None = None,
     config_file: str | None = None,
-    **kwargs: Any,
+    **kwargs: Any,  # noqa: ARG001
 ) -> dict[str, Any]:
     """Load configuration from YAML file.
 
@@ -72,7 +72,7 @@ def _is_readable_yaml(path: Path) -> bool:
         return False
     try:
         with open(path) as f:
-            yaml.safe_load(f)
+            yaml.safe_load(f.read())
         return True
     except Exception:
         return False
