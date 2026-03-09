@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Provides a unified builder API for composing CLI applications from modules (echo, config, diag).
+Provides a unified builder API for composing CLI applications from modules (echo, config, diag, commands).
 
 ## ADDED Requirements
 
@@ -27,6 +27,10 @@ The JCLI instance SHALL provide an `add_module(name: str, **options)` method tha
 #### Scenario: Add diag module with callback
 - **WHEN** `jcli.add_module("diag", my_callback)`
 - **THEN** diag module is registered with the provided callback
+
+#### Scenario: Add commands module
+- **WHEN** `jcli.add_module("commands")`
+- **THEN** commands module is registered and method returns `jcli` instance
 
 ### Requirement: JCLI supports fluent add_argument
 The JCLI instance SHALL provide an `add_argument(*args, **kwargs)` method that forwards to argparse and returns self for chaining.

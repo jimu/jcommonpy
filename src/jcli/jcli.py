@@ -12,7 +12,7 @@ __all__ = ["JCLI"]
 class JCLI:
     """Builder class for composing CLI applications from modules."""
 
-    ALLOWED_MODULES = frozenset({"echo", "config", "diag"})
+    ALLOWED_MODULES = frozenset({"echo", "config", "diag", "commands"})
 
     def __init__(self, app_name: str) -> None:
         """Initialize JCLI with app name.
@@ -175,6 +175,11 @@ class JCLI:
         if name == "diag":
             callback = options.get("callback")
             return callback
+
+        if name == "commands":
+            from jcli import commands as commands_module
+
+            return commands_module
 
         raise ValueError(f"Unknown module: {name}")
 
