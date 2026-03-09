@@ -59,6 +59,11 @@ uv pip install -e .
 python examples/basic.py
 python examples/basic.py --verbose
 python examples/basic.py --diag
+
+# Or run directly (add project to PATH first)
+./basic
+./basic --verbose
+./basic --diag
 ```
 ## Design Philosophy
 
